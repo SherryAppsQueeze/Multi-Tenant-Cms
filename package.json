@@ -15,9 +15,14 @@
         "vite": "^7.0.4"
     },
     "dependencies": {
+        "@heroicons/vue": "^2.2.0",
         "@inertiajs/inertia": "^0.11.1",
         "@inertiajs/inertia-vue3": "^0.6.0",
         "@inertiajs/vue3": "^2.0.17",
+        "@tailwindcss/line-clamp": "^0.4.4",
+        "@tiptap/extension-placeholder": "^3.0.9",
+        "@tiptap/starter-kit": "^3.0.9",
+        "@tiptap/vue-3": "^3.0.9",
         "@vitejs/plugin-vue": "^6.0.1",
         "vue": "^3.5.18",
         "vue3-emoji-picker": "^1.1.8"

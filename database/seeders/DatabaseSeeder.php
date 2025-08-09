@@ -21,5 +21,8 @@ class DatabaseSeeder extends Seeder
             'tenant_id' => '1',
             'name' => 'user1'
         ]);
+
+        //run TenantSeeder
+        $this->call(TenantSeeder::class);
     }
 }

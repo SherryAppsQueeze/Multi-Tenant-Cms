@@ -1,11 +1,12 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthController;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
 use App\Models\Tanents\Tanent;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\TanentController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Auth\AuthController;
 
 
 Route::get('/', function () {
@@ -28,8 +29,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/stickers/{identifier}', [TanentController::class, 'stickersShow'])->name('stickers.show');
     Route::get('/edit-sticker-category', [TanentController::class, 'edit'])->name('stickers.edit');
     Route::post('/update-sticker-category', [TanentController::class, 'update'])->name('stickers.update');
-    Route::get('/stickers-category-create', [TanentController::class, 'createIndex'])->name('stickers.category.create.index');
-    Route::post('/stickers-category-create', [TanentController::class, 'create'])->name('stickers.category.create');
+
+    Route::get('/category-create', [TanentController::class, 'createIndex'])->name('category.create.index');
+    Route::post('/category-create', [TanentController::class, 'create'])->name('category.create');
+    Route::get('/category-posts', [TanentController::class, 'categoryPosts'])->name('category.post.show');
+
+    Route::get('/create-category-posts-index', [PostController::class, 'postCreateIndex'])->name('post.create.index');
+    Route::post('/create-category-posts', [PostController::class, 'postCreate'])->name('posts.store');
+    Route::get('/post-detail-index', [PostController::class, 'postDetail'])->name('post.show');
+    Route::put('/post/update/{id}', [PostController::class, 'update'])->name('post.update');
 
 
     Route::get('/stickers-category-delete', [TanentController::class, 'delete'])->name('stickers.delete.index');

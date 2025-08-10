@@ -51,47 +51,4 @@ class TanentController extends Controller
     }
 
 
-    public function createIndex()
-    {
-        return Inertia::render('CategoryCreate');
-    }
-
-    public function create(Request $request)
-    {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-        ], [
-            'name.required' => 'The category name is required.',
-            'name.string' => 'The category name must be a string.',
-            'name.max' => 'The category name may not be greater than 255 characters.',
-        ]);
-
-        // Assuming you have a Tanent model to handle the creation
-        Category::create([
-            'tenant_id' => '1',
-            'name' => $data['name'],
-        ]);
-
-        return redirect()->route('home')->with('success', 'Category created successfully.');
-    }
-
-    public function categoryPosts()
-    {
-        $id = request()->query('id');
-        $categoryName = request()->query('categoryName');
-
-        if (!$id || !$categoryName) {
-            return redirect()->back()->with('error', 'Category ID and name are required');
-        }
-
-        $post = Post::where('category_id', $id)->with('category')->get();
-
-        return Inertia::render('CategoryPosts', [
-            'posts' => $post,
-            'categoryId' => $id,
-            'categoryName' => $categoryName,
-        ]);
-    }
-
-
 }

@@ -43,9 +43,9 @@
                         <span class="text-xs text-gray-400">
                             {{ new Date(post.created_at).toLocaleDateString() }}
                         </span>
-                        <Link :href="route('post.create.index', post.id)"
+                        <Link :href="route('post.show')" method="get" :data="{ id: post.id, postTitle: post.title }"
                             class="bg-gradient-to-r from-purple-600 to-pink-500 px-4 py-1 rounded-full text-sm font-semibold hover:from-purple-700 hover:to-pink-600 transition-all">
-                        Read More
+                        Read More →
                         </Link>
                     </div>
                 </div>

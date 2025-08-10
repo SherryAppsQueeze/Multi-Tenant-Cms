@@ -19,7 +19,13 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                 <div v-for="cat in categories" :key="cat.id"
                     class="bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-white/10 hover:scale-105 hover:shadow-purple-500/30 transition duration-300">
-                    <h3 class="text-lg font-semibold mb-2">{{ cat.name }}</h3>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-semibold">{{ cat.name }}</h3>
+                        <Link :href="route('category.edit')" method="get" :data="{ id: cat.id, categoryName: cat.name }"
+                            class="ml-2 text-xs bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-full font-semibold transition">
+                        Edit
+                        </Link>
+                    </div>
                     <span
                         class="inline-block bg-white text-pink-600 text-xs font-semibold px-3 py-1 rounded-full mb-4 shadow">
                         {{ cat.posts_count }} Posts
@@ -81,8 +87,7 @@
                         <span>{{ new Date(post.created_at).toLocaleDateString() }}</span>
                     </div>
 
-                    <Link :href="route('post.show')" method="get"
-                        :data="{ id: post.id, postTitle: post.title }"
+                    <Link :href="route('post.show')" method="get" :data="{ id: post.id, postTitle: post.title }"
                         class="inline-block mt-3 text-sm font-semibold text-pink-500 hover:underline">
                     Read More →
                     </Link>

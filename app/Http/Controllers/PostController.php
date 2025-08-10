@@ -100,26 +100,62 @@ class PostController extends Controller
 
     public function update(Request $request, $id)
     {
-        dd($request->all());
+        if (!$id) {
+            return redirect()->back()->with('error', 'Post ID is required');
+        }
+
         $post = Post::findOrFail($id);
 
         $data = $request->validate([
             'title' => 'required|string|max:255',
-            'content' => 'nullable|string',
+            'content' => 'required',
             'category_id' => 'required|exists:categories,id',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:2048',
         ]);
+        if (!$data) {
+            return redirect()->back()->with('error', 'Validation failed');
+        }
 
         if ($request->hasFile('featured_image')) {
             $imageName = time() . '.' . $request->file('featured_image')->getClientOriginalExtension();
             $request->file('featured_image')->storeAs('featured_images', $imageName, 'public');
             $data['featured_image'] = $imageName;
+
+            // Delete the old image if it exists
+            if ($post->featured_image) {
+                $oldImagePath = public_path('storage/featured_images/' . $post->featured_image);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
         } else {
-            $data['featured_image'] = $post->featured_image; // Keep the existing image if not updated
+            $data['featured_image'] = $post->featured_image;
         }
+        $data['tanant_id'] = 1;
+        $data['updated_by'] = $this->user ? $this->user->id : null;
 
         $post->update($data);
 
         return redirect()->back()->with('success', 'Post updated successfully.');
+    }
+
+    public function destroy($id)
+    {
+        if (!$id) {
+            return redirect()->back()->with('error', 'Post ID is required');
+        }
+
+        $post = Post::findOrFail($id);
+
+        if ($post->featured_image) {
+            $oldImagePath = public_path('storage/featured_images/' . $post->featured_image);
+            if (file_exists($oldImagePath)) {
+                unlink($oldImagePath);
+            }
+        }
+
+        $post->delete();
+
+        return redirect()->route('home')->with('success', 'Post deleted successfully.');
     }
 }

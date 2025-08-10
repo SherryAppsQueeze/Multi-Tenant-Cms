@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use Inertia\Inertia;
 use App\Models\Posts\Post;
 use Illuminate\Http\Request;
 use App\Models\Categories\Category;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
-class PostController extends Controller
+class ApiResourceController extends Controller
 {
 
     protected $user;
     protected $tenantId;
+
     public function __construct()
     {
         $this->user = Auth::user();
@@ -20,26 +21,75 @@ class PostController extends Controller
     }
 
 
-
-    public function postCreateIndex(Request $request)
+    public function categoryindex()
     {
-        $categoryId = $request->input('categoryId');
-
-        if (!$categoryId) {
-            return redirect()->back()->with('error', 'Category ID is required');
-        }
-
-        return Inertia::render('PostCreate', [
-            'categoryId' => $categoryId,
-            'categoryName' => $request->input('categoryName', 'Default Category Name'),
-        ]);
+        $data = Category::all();
+        return response()->json($data, 200);
     }
 
+    public function createCategory(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+        ], [
+            'name.required' => 'The category name is required.',
+            'name.string' => 'The category name must be a string.',
+            'name.max' => 'The category name may not be greater than 255 characters.',
+        ]);
 
+        Category::create([
+            'tenant_id' => $this->tenantId ?? 1,
+            'name' => $data['name'],
+        ]);
+
+        return response()->json(['message' => 'Category created successfully.'], 201);
+    }
+
+    public function updateCategory(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'id' => 'required|integer|exists:categories,id',
+        ], [
+            'name.required' => 'The category name is required.',
+            'name.string' => 'The category name must be a string.',
+            'name.max' => 'The category name may not be greater than 255 characters.',
+            'id.required' => 'The category ID is required.',
+        ]);
+
+        $category = Category::findOrFail($request->id);
+
+        $category->update($data);
+
+        return response()->json(['message' => 'Category updated successfully.'], 200);
+    }
+
+    public function categoryPosts(Request $request)
+    {
+        $id = $request->query('id');
+
+
+        if (!$id) {
+            return response()->json(['message' => 'Category ID are required'], 400);
+        }
+
+        $posts = Post::where('category_id', $id)->with('category')->get();
+
+        $posts->each(function ($post) {
+            if ($post->featured_image) {
+                $post->featured_image = asset('storage/featured_images/' . $post->featured_image);
+            }
+        });
+
+        return response()->json([
+            'posts' => $posts,
+            'categoryId' => $id,
+            'categoryName' => Category::find($id)->name,
+        ], 200);
+    }
 
     public function postCreate(Request $request)
     {
-
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
@@ -73,49 +123,41 @@ class PostController extends Controller
             'created_by' => $this->user ? $this->user->id : null,
         ]);
 
-        return redirect()->back()->with('success', 'Post created successfully.');
+        return response()->json(['message' => 'Post created successfully.'], 201);
     }
-
 
     public function postDetail(Request $request)
     {
-        $postId = $request->query('id');
-        $postTitle = $request->query('postTitle');
+        $id = $request->query('id');
 
-        if (!$postId || !$postTitle) {
-            return redirect()->back()->with('error', 'Post ID and title are required');
+        if (!$id) {
+            return response()->json(['message' => 'Post ID is required'], 400);
         }
 
-        $post = Post::where('id', $postId)->with('category')->first();
-        $categories = Category::all();
+        $post = Post::with('category')->findOrFail($id);
 
-        if (!$post) {
-            return redirect()->back()->with('error', 'Post not found');
+        if ($post->featured_image) {
+            $post->featured_image = asset('storage/featured_images/' . $post->featured_image);
         }
 
-        return Inertia::render('PostDetail', [
-            'post' => $post,
-            'postTitle' => $postTitle,
-            'categories' => $categories,
-        ]);
+        return response()->json($post, 200);
     }
 
-    public function update(Request $request, $id)
+
+    public function Postupdate(Request $request)
     {
-        if (!$id) {
-            return redirect()->back()->with('error', 'Post ID is required');
-        }
-
-        $post = Post::findOrFail($id);
-
         $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required',
-            'category_id' => 'required|exists:categories,id',
+            'id' => 'required|integer|exists:posts,id',
+            'title' => 'nullable|string|max:255',
+            'content' => 'nullable',
+            'category_id' => 'nullable|exists:categories,id',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:2048',
         ]);
-        if (!$data) {
-            return redirect()->back()->with('error', 'Validation failed');
+
+        $post = Post::find($data['id']);
+
+        if (!$post) {
+            return response()->json(['message' => 'Post not found'], 404);
         }
 
         if ($request->hasFile('featured_image')) {
@@ -123,7 +165,6 @@ class PostController extends Controller
             $request->file('featured_image')->storeAs('featured_images', $imageName, 'public');
             $data['featured_image'] = $imageName;
 
-            // Delete the old image if it exists
             if ($post->featured_image) {
                 $oldImagePath = public_path('storage/featured_images/' . $post->featured_image);
                 if (file_exists($oldImagePath)) {
@@ -133,18 +174,21 @@ class PostController extends Controller
         } else {
             $data['featured_image'] = $post->featured_image;
         }
-        $data['tanant_id'] = $this->tenantId ?? 1;
+
+        $data['tenant_id'] = 1;
         $data['updated_by'] = $this->user ? $this->user->id : null;
 
-        $post->update($data);
+        unset($data['id']);
 
-        return redirect()->back()->with('success', 'Post updated successfully.');
+        $post->update($data);
+        return response()->json(['message' => 'Post updated successfully.'], 200);
     }
+
 
     public function destroy($id)
     {
         if (!$id) {
-            return redirect()->back()->with('error', 'Post ID is required');
+            return response()->json(['message' => 'Post ID is required'], 400);
         }
 
         $post = Post::findOrFail($id);
@@ -158,6 +202,6 @@ class PostController extends Controller
 
         $post->delete();
 
-        return redirect()->route('home')->with('success', 'Post deleted successfully.');
+        return response()->json(['message' => 'Post deleted successfully.'], 200);
     }
 }

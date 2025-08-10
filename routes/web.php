@@ -13,15 +13,13 @@ use App\Http\Controllers\Auth\AuthController;
 Route::get('/', function () {
     return redirect()->route('home');
 });
+Route::get('/test-tenant', function () {
+    $tenant = app('currentTenant');
+    return response()->json($tenant);
+});
 
-
-Route::get('/dd', function (Request $request) {
-    $subdomain = explode('.', $request->host())[0];
-
-    $tenant = Tanent::where('subdomain', $subdomain)->first();
-
-    dd($tenant);
-    app()->instance('currentTenant', $tenant);
+Route::get('/ddsd', function (Request $request) {
+    return response()->json(app('currentTenant'));
 });
 
 

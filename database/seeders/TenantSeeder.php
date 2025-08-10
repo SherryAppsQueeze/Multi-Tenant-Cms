@@ -15,12 +15,12 @@ class TenantSeeder extends Seeder
     {
         Tanent::create([
             'name' => 'Tenant One',
-            'subdomain' => 'tenant1.localhost',
+            'subdomain' => 'tenant1.app.domain.com',
         ]);
 
         Tanent::create([
             'name' => 'Tenant Two',
-            'subdomain' => 'tenant2.localhost',
+            'subdomain' => 'tenant2.app.domain.com',
         ]);
     }
 }

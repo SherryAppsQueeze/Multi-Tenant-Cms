@@ -6,9 +6,18 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\Sanctum;
 
 class AuthController extends Controller
 {
+
+    protected $tenantId;
+
+    public function __construct()
+    {
+        $this->tenantId = currentTenantId();
+    }
+
     public function register(Request $request)
     {
         $request->validate([
@@ -21,7 +30,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'tenant_id' => '1'
+            'tenant_id' => $this->tenantId ?? 1
         ]);
 
         // Return a response
@@ -42,11 +51,22 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken($request->email)->plainTextToken;
-dd($user, $token);
+
+
+
         return response()->json([
             'message' => 'Login successful',
             'token' => $token,
             'user' => $user
+        ], 200);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logged out successfully'
         ], 200);
     }
 }

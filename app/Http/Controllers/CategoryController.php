@@ -9,6 +9,14 @@ use App\Models\Categories\Category;
 
 class CategoryController extends Controller
 {
+
+    protected $tenantId;
+
+    public function __construct()
+    {
+        $this->tenantId = currentTenantId();
+    }
+
     public function createIndex()
     {
         return Inertia::render('CategoryCreate');
@@ -26,7 +34,7 @@ class CategoryController extends Controller
 
         // Assuming you have a Tanent model to handle the creation
         Category::create([
-            'tenant_id' => '1',
+            'tenant_id' => $this->tenantId ?? 1,
             'name' => $data['name'],
         ]);
 

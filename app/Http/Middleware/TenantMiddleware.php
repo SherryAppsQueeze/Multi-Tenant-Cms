@@ -14,11 +14,12 @@ class TenantMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
+
     public function handle(Request $request, Closure $next): Response
     {
-        // Extract subdomain from request and find tenant
-        $subdomain = explode('.', $request->getHost())[0];
-        $tenant = Tanent::where('subdomain', $subdomain)->firstOrFail();
+        $url =  $request->getHost();
+        $host = parse_url($url, PHP_URL_HOST);
+        $tenant = Tanent::where('subdomain', $host)->firstOrFail();
         app()->instance('currentTenant', $tenant);
 
         return $next($request);

@@ -1,10 +1,6 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 
-const props = defineProps({
-    flash: Object,
-});
-
 const form = useForm({
     name: null,
 });
@@ -12,15 +8,8 @@ const form = useForm({
 // Submit the form
 function submit() {
     form.post(route('category.create'), {
-
-        onSuccess: () => {
-            form.reset();
-        },
-        onError: () => {
-
-        },
+        onSuccess: () => form.reset(),
         preserveScroll: true,
-        preserveState: true,
     });
 }
 </script>
@@ -43,6 +32,11 @@ function submit() {
                     <input type="text" v-model="form.name" placeholder="Category Name"
                         class="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                     <p v-if="form.errors.name" class="text-red-400 text-sm mt-1">{{ form.errors.name }}</p>
+                </div>
+                <div v-if="Object.keys(form.errors).length" class="mb-4">
+                    <ul class="text-red-400 text-sm list-disc pl-5">
+                        <li v-for="(message, field) in form.errors" :key="field">{{ message }}</li>
+                    </ul>
                 </div>
 
 

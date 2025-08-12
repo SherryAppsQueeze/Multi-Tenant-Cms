@@ -39,7 +39,7 @@ const submit = () => {
         <h1 class="text-3xl font-bold mb-8 text-center text-purple-200 drop-shadow-md">Welcome, {{ loggedInUser.name }}
         </h1>
 
-        <!-- Profile Info Card -->  
+        <!-- Profile Info Card -->
         <div
             class="bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 border border-gray-700 transition-transform hover:scale-[1.02]">
             <h2 class="text-2xl font-bold mb-6 text-indigo-400 drop-shadow">Your Info</h2>
@@ -98,11 +98,13 @@ const submit = () => {
                             Password</label>
                         <input type="password" id="current_password" v-model="password_form.current_password"
                             class="mt-1 block w-full border border-gray-600 rounded-md focus:ring-pink-500 focus:border-pink-500 px-4 py-2 bg-gray-700 text-white placeholder-gray-400" />
+                            <p v-if="form.errors.current_password" class="text-red-400 text-sm mt-1">{{ form.errors.current_password }}</p>
                     </div>
                     <div>
                         <label for="new_password" class="block text-sm font-medium text-gray-300">New Password</label>
                         <input type="password" id="new_password" v-model="password_form.new_password"
                             class="mt-1 block w-full border border-gray-600 rounded-md focus:ring-pink-500 focus:border-pink-500 px-4 py-2 bg-gray-700 text-white placeholder-gray-400" />
+                            <p v-if="form.errors.new_password" class="text-red-400 text-sm mt-1">{{ form.errors.new_password }}</p>
                     </div>
                     <button type="submit"
                         class="w-full bg-gradient-to-r from-pink-500 to-red-500 text-white px-4 py-2 rounded-lg shadow-lg hover:scale-105 transition duration-300 font-semibold">

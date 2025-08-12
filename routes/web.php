@@ -43,8 +43,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('admin-profile', function () {
         return Inertia::render('Auth/Profile');
     })->name('profile');
-    Route::post('/admin-profile-update', [TanentController::class, 'updateProfile'])->name('profile.update');
-    Route::post('/admin-password-update', [TanentController::class, 'updatePassword'])->name('profile.password.update');
+    Route::post('/admin-profile-update', [AuthController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/admin-password-update', [AuthController::class, 'updatePassword'])->name('profile.password.update');
 
     Route::post('/user-logout', [AuthController::class, 'logout'])->name('logout');
 });

@@ -10,13 +10,57 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    
-    
+
+
     protected $tenantId;
     public function __construct()
     {
         $this->tenantId = currentTenantId();
     }
+
+
+    public function updateProfile(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email|exists:users,email'
+        ]);
+
+        $user = Auth::user();
+        $user->update([
+            'name' => $data['name'],
+            'email' => $data['email']
+        ]);
+
+
+        return redirect()->back()->with('success', 'Profile updated successfully...');
+    }
+
+
+    public function updatePassword(Request $request)
+    {
+        $data = $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:6'
+        ]);
+
+
+        $user = Auth::user();
+
+
+        if (!Hash::check($data['current_password'], $user->password)) {
+            return back()->withErrors(['current_password' => 'Current password is incorrect']);
+        }
+
+        // Update password
+        $user->update([
+            'password' => Hash::make($data['new_password'])
+        ]);
+
+        return redirect()->back()->with('success', 'Password updated successfully.');
+    }
+
+
 
     public function register(Request $request)
     {
@@ -60,7 +104,7 @@ class AuthController extends Controller
             'email' => 'required|email|exists:users,email',
             'password' => 'required'
         ]);
-        
+
 
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
 
